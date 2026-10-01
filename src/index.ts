@@ -12,7 +12,8 @@ app.get("/", (req, res) => {
 app.get("/add", (req, res) => {
     const a = Number(req.query.a);
     const b = Number(req.query.b);
-    res.json({ result: Utils.add(a, b) });
+    // BUG (intentional, for the red integration test): multiplies instead of calling Utils.add
+    res.json({ result: a * b });
 });
 
 app.listen(port, () => {

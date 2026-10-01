@@ -10,7 +10,8 @@ const integration_test = async () => {
         console.log("Integration case 1 passed: GET /");
     } else {
         console.log(`Integration case 1 failed: GET / -> ${res1.status} "${body1}"`);
-        process.exit(1);
+        process.exitCode = 1;
+        return;
     }
 
     // test2: GET /add?a=1&b=2 goes through the route into Utils.add
@@ -20,11 +21,12 @@ const integration_test = async () => {
         console.log("Integration case 2 passed: GET /add?a=1&b=2 -> 3");
     } else {
         console.log(`Integration case 2 failed: GET /add?a=1&b=2 -> ${res2.status} ${JSON.stringify(body2)} (expected 3)`);
-        process.exit(1);
+        process.exitCode = 1;
+        return;
     }
 };
 
 integration_test().catch((err) => {
     console.log(`Integration test error: ${err}`);
-    process.exit(1);
+    process.exitCode = 1;
 });
