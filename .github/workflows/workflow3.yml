@@ -24,7 +24,13 @@ jobs:
       - name: Run container and test
         run: |
           docker run -d --name myserver -p 3000:3000 myserver:${{ github.event.workflow_run.head_sha }}
-          body=$(curl -s --retry 10 --retry-connrefused --retry-delay 1 http://localhost:3000/)
+          # Wait until the app inside the container is listening (connection may be reset while it starts)
+          body=""
+          for i in $(seq 1 30); do
+            body=$(curl -s http://localhost:3000/ || true)
+            [ -n "$body" ] && break
+            sleep 1
+          done
           echo "Response: $body"
           docker logs myserver
           if [ "$body" != "Hello, World!" ]; then
