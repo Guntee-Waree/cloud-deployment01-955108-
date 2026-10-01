@@ -1,0 +1,61 @@
+name: Workflow 1
+
+# WF1: build + unit test. Runs on every push to main.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  job1:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  job2:
+    name: Unit test
+    needs: job1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Test1
+        run: |
+          output=$(node dist/Test1.js)
+          # Test1.js prints 0 (pass) or 1 (fail)
+          exit_code=$output
+          if [ "$exit_code" -ne 0 ]; then
+            echo "::error::The Node.js script failed with exit code $exit_code"
+            exit 1
+          fi
+          echo "Unit test passed"

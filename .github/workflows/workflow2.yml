@@ -1,0 +1,45 @@
+name: Workflow 2
+
+# WF2: integration test. Starts after Workflow 1 completes, in parallel with Workflow 3.
+on:
+  workflow_run:
+    workflows: ["Workflow 1"]
+    types:
+      - completed
+
+jobs:
+  job1:
+    name: Integration test (HTTP)
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Start server
+        run: |
+          nohup node dist/index.js > server.log 2>&1 &
+          sleep 3
+
+      - name: Call GET /
+        run: |
+          body=$(curl -s --retry 5 --retry-connrefused http://localhost:3000/)
+          echo "Response: $body"
+          if [ "$body" != "Hello, World!" ]; then
+            echo "::error::Unexpected response from server"
+            cat server.log
+            exit 1
+          fi

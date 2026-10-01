@@ -1,0 +1,73 @@
+name: Workflow 4
+
+# WF4: runs only after BOTH Workflow 2 and Workflow 3 succeed for the same commit (fan-in).
+# workflow_run fires once per finished workflow, so each run checks the other one through the API.
+on:
+  workflow_run:
+    workflows: ["Workflow 2", "Workflow 3"]
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  gate:
+    name: Wait for Workflow 2 + 3
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - name: Check both workflows
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          TRIGGER: ${{ github.event.workflow_run.name }}
+        run: |
+          latest() {
+            gh api "repos/$REPO/actions/workflows/$1/runs?head_sha=$SHA&per_page=1" \
+              --jq '.workflow_runs[0] | "\(.status) \(.conclusion) \(.updated_at)"'
+          }
+          read s2 c2 t2 <<< "$(latest workflow2.yml)"
+          read s3 c3 t3 <<< "$(latest workflow3.yml)"
+          echo "Workflow 2: $s2 / $c2 / $t2"
+          echo "Workflow 3: $s3 / $c3 / $t3"
+
+          ready=false
+          if [ "$s2" = completed ] && [ "$s3" = completed ] && [ "$c2" = success ] && [ "$c3" = success ]; then
+            # Both finished: only the run triggered by the later one continues, so WF4 runs once
+            if [ "$TRIGGER" = "Workflow 2" ] && [[ ! "$t2" < "$t3" ]]; then ready=true; fi
+            if [ "$TRIGGER" = "Workflow 3" ] && [[ ! "$t3" < "$t2" ]]; then ready=true; fi
+          fi
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+          echo "Triggered by $TRIGGER, ready=$ready"
+
+  job1:
+    name: Deploy
+    needs: gate
+    if: ${{ needs.gate.outputs.ready == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Deploy
+        run: |
+          echo "Workflow 1 -> (Workflow 2 || Workflow 3) -> Workflow 4"
+          echo "Deploying commit ${{ github.event.workflow_run.head_sha }}"
+
+      - name: Summary
+        run: |
+          {
+            echo "## Pipeline complete"
+            echo "- Workflow 1: build + unit test"
+            echo "- Workflow 2: integration test (parallel)"
+            echo "- Workflow 3: docker build (parallel)"
+            echo "- Workflow 4: deploy"
+            echo "Commit: \`${{ github.event.workflow_run.head_sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

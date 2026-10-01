@@ -1,0 +1,33 @@
+name: Workflow 3
+
+# WF3: Docker build + smoke test. Starts after Workflow 1 completes, in parallel with Workflow 2.
+on:
+  workflow_run:
+    workflows: ["Workflow 1"]
+    types:
+      - completed
+
+jobs:
+  job1:
+    name: Docker build
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Build image
+        run: docker build -t myserver:${{ github.event.workflow_run.head_sha }} -f Dockerfile .
+
+      - name: Run container and test
+        run: |
+          docker run -d --name myserver -p 3000:3000 myserver:${{ github.event.workflow_run.head_sha }}
+          body=$(curl -s --retry 10 --retry-connrefused --retry-delay 1 http://localhost:3000/)
+          echo "Response: $body"
+          docker logs myserver
+          if [ "$body" != "Hello, World!" ]; then
+            echo "::error::Container did not respond correctly"
+            exit 1
+          fi

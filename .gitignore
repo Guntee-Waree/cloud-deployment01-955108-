@@ -1,0 +1,15 @@
+*
+!.gitignore
+!.dockerignore
+!Dockerfile
+!README.md
+!package.json
+!package-lock.json
+!tsconfig.json
+!nodemon.json
+!src/
+!src/**
+!dist/
+!dist/**
+!.github/
+!.github/**
