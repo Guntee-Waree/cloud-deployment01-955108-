@@ -9,7 +9,7 @@ on:
 
 jobs:
   job1:
-    name: Integration test (Calculator module)
+    name: Integration test (UserService module)
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -29,5 +29,5 @@ jobs:
           npm ci
           npm run build
 
-      - name: Run integration test (Calculator module)
+      - name: Run integration test (UserService module)
         run: node dist/IntegrationTest.js
