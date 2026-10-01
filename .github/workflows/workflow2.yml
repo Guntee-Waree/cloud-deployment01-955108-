@@ -34,12 +34,9 @@ jobs:
           nohup node dist/index.js > server.log 2>&1 &
           sleep 3
 
-      - name: Call GET /
-        run: |
-          body=$(curl -s --retry 5 --retry-connrefused http://localhost:3000/)
-          echo "Response: $body"
-          if [ "$body" != "Hello, World!" ]; then
-            echo "::error::Unexpected response from server"
-            cat server.log
-            exit 1
-          fi
+      - name: Run integration test
+        run: node dist/IntegrationTest.js
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat server.log

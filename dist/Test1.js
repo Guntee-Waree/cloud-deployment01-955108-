@@ -5,15 +5,20 @@ const Utils_1 = require("./Utils");
 // (the workflow reads this value as the exit code, as in the course slides)
 const unit_test = () => {
     // test1
-    if (Utils_1.Utils.add(1, 2) !== 3) {
-        console.log(1);
-        return;
+    if (Utils_1.Utils.add(2, 2) === 4) {
+        console.log("Test case 1 passed");
+    }
+    else {
+        console.log("Test case 1 failed");
+        process.exit(1);
     }
     // test2
-    if (Utils_1.Utils.helloworld() !== "hello world") {
-        console.log(1);
-        return;
+    if (Utils_1.Utils.add(3, 3) === 6) {
+        console.log("Test case 2 passed");
     }
-    console.log(0);
+    else {
+        console.log("Test case 2 failed");
+        process.exit(1);
+    }
 };
 unit_test();

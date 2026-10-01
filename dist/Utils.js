@@ -1,10 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Utils = void 0;
-function helloworld() {
-    return "hello world";
+function hello() {
+    console.log("Hello, world!");
 }
 function add(a, b) {
     return a + b;
 }
-exports.Utils = { helloworld, add };
+exports.Utils = {
+    hello,
+    add
+};
