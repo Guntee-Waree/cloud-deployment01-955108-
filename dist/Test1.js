@@ -20,5 +20,21 @@ const unit_test = () => {
         console.log("Test case 2 failed");
         process.exit(1);
     }
+    // test3
+    if (Utils_1.Utils.multiply(3, 4) === 12) {
+        console.log("Test case 3 passed");
+    }
+    else {
+        console.log("Test case 3 failed");
+        process.exit(1);
+    }
+    // test4
+    if (Utils_1.Utils.divide(10, 2) === 5) {
+        console.log("Test case 4 passed");
+    }
+    else {
+        console.log("Test case 4 failed");
+        process.exit(1);
+    }
 };
 unit_test();
