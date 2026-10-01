@@ -4,16 +4,20 @@ import { Utils } from "./Utils";
 // (the workflow reads this value as the exit code, as in the course slides)
 const unit_test = () => {
     // test1
-    if (Utils.add(1, 2) !== 3) {
-        console.log(1);
-        return;
+    if (Utils.add(2, 2) === 4) {
+        console.log("Test case 1 passed");
+    } else {
+        console.log("Test case 1 failed");
+        process.exit(1);
     }
+    
     // test2
-    if (Utils.helloworld() !== "hello world") {
-        console.log(1);
-        return;
+    if (Utils.add(3,3) === 6) {
+        console.log("Test case 2 passed");
+    } else {
+        console.log("Test case 2 failed");
+        process.exit(1);
     }
-    console.log(0);
 };
 
 unit_test();

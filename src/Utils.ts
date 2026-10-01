@@ -1,9 +1,12 @@
-function helloworld(): string {
-    return "hello world";
+function hello() {
+    console.log("Hello, world!");
 }
 
 function add(a: number, b: number): number {
     return a + b;
 }
 
-export const Utils = { helloworld, add };
+export const Utils = {
+    hello,
+    add
+};
