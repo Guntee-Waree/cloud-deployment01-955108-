@@ -16,9 +16,6 @@ const unit_test = () => {
     check("2 add(3,3)", Utils.add(3, 3) === 6);
     check("3 trimText", Utils.trimText("  abc  ") === "abc");
     check("4 capitalize", Utils.capitalize("sOMchai") === "Somchai");
-    check("5 toLower", Utils.toLower("ABC") === "abc");
-    check("6 isValidEmail (valid)", Utils.isValidEmail("a@b.co") === true);
-    check("7 isValidEmail (invalid)", Utils.isValidEmail("abc") === false);
 };
 
 unit_test();

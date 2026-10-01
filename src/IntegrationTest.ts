@@ -1,39 +1,21 @@
-import { UserService } from "./UserService";
+import { Greeting } from "./Greeting";
 
-// Integration test: tests the UserService module, which combines several Utils functions.
+// Integration test: tests the Greeting module, which combines Utils.trimText + Utils.capitalize.
 // Exit code 0 = all cases passed, 1 = at least one case failed.
 const integration_test = () => {
-    // case 1: formatName -> Utils.trimText + Utils.capitalize
-    if (UserService.formatName("  somchai ", " JAIDEE") === "Somchai Jaidee") {
-        console.log("Integration case 1 passed: formatName -> Somchai Jaidee");
+    // case 1: spaces + lower case
+    if (Greeting.greet("  somchai ") === "Hello, Somchai!") {
+        console.log("Integration case 1 passed: greet('  somchai ') -> Hello, Somchai!");
     } else {
-        console.log("Integration case 1 failed: formatName expected 'Somchai Jaidee'");
+        console.log("Integration case 1 failed: expected 'Hello, Somchai!'");
         process.exit(1);
     }
 
-    // case 2: createUsername -> Utils.trimText + Utils.toLower
-    if (UserService.createUsername(" Somchai", "Jaidee ") === "sjaidee") {
-        console.log("Integration case 2 passed: createUsername -> sjaidee");
+    // case 2: upper case
+    if (Greeting.greet("JAIDEE") === "Hello, Jaidee!") {
+        console.log("Integration case 2 passed: greet('JAIDEE') -> Hello, Jaidee!");
     } else {
-        console.log("Integration case 2 failed: createUsername expected 'sjaidee'");
-        process.exit(1);
-    }
-
-    // case 3: registerUser (valid email) -> all Utils functions working together
-    const user = UserService.registerUser("  somchai ", "JAIDEE", "  Somchai@CMU.ac.th ");
-    const expected = { fullName: "Somchai Jaidee", username: "sjaidee", email: "somchai@cmu.ac.th" };
-    if (JSON.stringify(user) === JSON.stringify(expected)) {
-        console.log("Integration case 3 passed: registerUser -> " + JSON.stringify(user));
-    } else {
-        console.log("Integration case 3 failed: registerUser got " + JSON.stringify(user));
-        process.exit(1);
-    }
-
-    // case 4: registerUser (invalid email) is rejected
-    if (UserService.registerUser("Somchai", "Jaidee", "not-an-email") === null) {
-        console.log("Integration case 4 passed: invalid email rejected");
-    } else {
-        console.log("Integration case 4 failed: invalid email was accepted");
+        console.log("Integration case 2 failed: expected 'Hello, Jaidee!'");
         process.exit(1);
     }
 };

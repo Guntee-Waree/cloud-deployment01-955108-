@@ -6,7 +6,7 @@ function add(a: number, b: number): number {
     return a + b;
 }
 
-// remove spaces at both ends
+// remove spaces at both ends: "  abc  " -> "abc"
 function trimText(text: string): string {
     return text.trim();
 }
@@ -19,20 +19,9 @@ function capitalize(text: string): string {
     return text[0].toUpperCase() + text.slice(1).toLowerCase();
 }
 
-function toLower(text: string): string {
-    return text.toLowerCase();
-}
-
-// simple check: something@something.something, no spaces
-function isValidEmail(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 export const Utils = {
     hello,
     add,
     trimText,
-    capitalize,
-    toLower,
-    isValidEmail
+    capitalize
 };
