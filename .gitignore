@@ -11,3 +11,9 @@
 !dist/Test1.js
 !postman/
 !postman/*.json
+!e2e/
+!e2e/*.ts
+!playwright.config.ts
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
