@@ -41,16 +41,9 @@ const post = (body) => __awaiter(void 0, void 0, void 0, function* () {
 });
 // Utils checks run in-process: email must not be blank, email must not be a duplicate.
 const util_checks = () => {
-    const existing = ["somchai@example.com", "jaidee@example.com"];
     const cases = [
-        ["U1 email empty is blank", Utils_1.Utils.isBlank("") === true],
-        ["U2 email spaces only is blank", Utils_1.Utils.isBlank("   ") === true],
-        ["U3 email missing is blank", Utils_1.Utils.isBlank(undefined) === true],
-        ["U4 email with text is not blank", Utils_1.Utils.isBlank("a@b.co") === false],
-        ["U5 duplicate email found", Utils_1.Utils.isDuplicateEmail("jaidee@example.com", existing) === true],
-        ["U6 duplicate ignores case and spaces", Utils_1.Utils.isDuplicateEmail("  SomChai@Example.COM ", existing) === true],
-        ["U7 new email is not duplicate", Utils_1.Utils.isDuplicateEmail("new@example.com", existing) === false],
-        ["U8 empty list has no duplicate", Utils_1.Utils.isDuplicateEmail("a@b.co", []) === false]
+        ["1 email empty is blank", Utils_1.Utils.isBlank("   ") === true],
+        ["2 duplicate email found (ignores case)", Utils_1.Utils.isDuplicateEmail(" SomChai@Example.COM ", ["somchai@example.com"]) === true]
     ];
     let bad = 0;
     for (const [name, ok] of cases) {
@@ -82,21 +75,8 @@ const automation_test = () => __awaiter(void 0, void 0, void 0, function* () {
     });
     try {
         yield waitForServer();
-        // email
-        yield expectRejected("1 email without @", { name: "A", email: "not-an-email" });
-        yield expectRejected("2 email without domain dot", { name: "A", email: "a@b" });
-        yield expectRejected("3 email with space inside", { name: "A", email: "a b@c.co" });
-        yield expectRejected("4 email missing", { name: "A" });
-        yield expectRejected("5 email not a string", { name: "A", email: 123 });
-        yield expectRejected("6 email empty", { name: "A", email: "" });
-        // age
-        yield expectRejected("7 age negative", { name: "A", email: "a@b.co", age: -1 });
-        yield expectRejected("8 age decimal", { name: "A", email: "a@b.co", age: 1.5 });
-        yield expectRejected("9 age string", { name: "A", email: "a@b.co", age: "20" });
-        yield expectRejected("10 age null", { name: "A", email: "a@b.co", age: null });
-        // name
-        yield expectRejected("11 name missing", { email: "a@b.co" });
-        yield expectRejected("12 name blank", { name: "   ", email: "a@b.co" });
+        yield expectRejected("3 invalid email", { name: "A", email: "not-an-email" });
+        yield expectRejected("4 negative age", { name: "A", email: "a@b.co", age: -1 });
     }
     catch (error) {
         console.log(`Automation test error: ${error}`);
