@@ -1,0 +1,35 @@
+name: Automation Test
+
+# Automation test: starts the real server and sends HTTP requests to check
+# email, age and name validation (src/AutomationTest.ts). No database needed.
+# Starts after Workflow 1 completes, in parallel with Workflow 2 and 3.
+on:
+  workflow_run:
+    workflows: ["Workflow 1"]
+    types:
+      - completed
+
+jobs:
+  job1:
+    name: Automation test (email, age, name validation)
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run automation test
+        run: npm run test:automation
