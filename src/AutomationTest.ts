@@ -1,8 +1,9 @@
 import { spawn } from "child_process";
 import path = require("path");
+import { Utils } from "./Utils";
 
-// Automation test: starts the real server and sends HTTP requests to check
-// email and age validation. No database needed: invalid input is rejected
+// Automation test: (1) checks the email utils, (2) starts the real server and
+// sends HTTP requests to check email and age validation. No database needed: invalid input is rejected
 // with 400 before MongoDB is touched.
 // Exit code 0 = all cases passed, 1 = at least one case failed.
 const PORT = 3200;
@@ -31,12 +32,37 @@ const post = async (body: object): Promise<number> => {
     return res.status;
 };
 
+// Utils checks run in-process: email must not be blank, email must not be a duplicate.
+const util_checks = (): number => {
+    const existing = ["somchai@example.com", "jaidee@example.com"];
+    const cases: Array<[string, boolean]> = [
+        ["U1 email empty is blank", Utils.isBlank("") === true],
+        ["U2 email spaces only is blank", Utils.isBlank("   ") === true],
+        ["U3 email missing is blank", Utils.isBlank(undefined) === true],
+        ["U4 email with text is not blank", Utils.isBlank("a@b.co") === false],
+        ["U5 duplicate email found", Utils.isDuplicateEmail("jaidee@example.com", existing) === true],
+        ["U6 duplicate ignores case and spaces", Utils.isDuplicateEmail("  SomChai@Example.COM ", existing) === true],
+        ["U7 new email is not duplicate", Utils.isDuplicateEmail("new@example.com", existing) === false],
+        ["U8 empty list has no duplicate", Utils.isDuplicateEmail("a@b.co", []) === false]
+    ];
+    let bad = 0;
+    for (const [name, ok] of cases) {
+        if (ok) {
+            console.log(`Automation case ${name} passed`);
+        } else {
+            console.log(`Automation case ${name} failed`);
+            bad++;
+        }
+    }
+    return bad;
+};
+
 const automation_test = async () => {
     const server = spawn(process.execPath, [path.join(__dirname, "index.js")], {
         env: { ...process.env, PORT: String(PORT) },
         stdio: "ignore"
     });
-    let failed = 0;
+    let failed = util_checks();
 
     const expectRejected = async (name: string, body: object) => {
         const status = await post(body);

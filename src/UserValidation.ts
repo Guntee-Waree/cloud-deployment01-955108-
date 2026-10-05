@@ -1,3 +1,5 @@
+import { Utils } from "./Utils";
+
 export interface UserData {
     name: string;
     email: string;
@@ -15,10 +17,10 @@ export function parseUserInput(body: UserInput): UserData | null {
     if (!body || typeof body !== "object") {
         return null;
     }
-    if (typeof body.name !== "string" || !body.name.trim()) {
+    if (typeof body.name !== "string" || Utils.isBlank(body.name)) {
         return null;
     }
-    if (typeof body.email !== "string" || !/^\S+@\S+\.\S+$/.test(body.email.trim())) {
+    if (typeof body.email !== "string" || Utils.isBlank(body.email) || !/^\S+@\S+\.\S+$/.test(body.email.trim())) {
         return null;
     }
     if (body.age !== undefined &&

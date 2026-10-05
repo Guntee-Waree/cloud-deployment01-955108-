@@ -11,8 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const path = require("path");
-// Automation test: starts the real server and sends HTTP requests to check
-// email and age validation. No database needed: invalid input is rejected
+const Utils_1 = require("./Utils");
+// Automation test: (1) checks the email utils, (2) starts the real server and
+// sends HTTP requests to check email and age validation. No database needed: invalid input is rejected
 // with 400 before MongoDB is touched.
 // Exit code 0 = all cases passed, 1 = at least one case failed.
 const PORT = 3200;
@@ -38,12 +39,37 @@ const post = (body) => __awaiter(void 0, void 0, void 0, function* () {
     });
     return res.status;
 });
+// Utils checks run in-process: email must not be blank, email must not be a duplicate.
+const util_checks = () => {
+    const existing = ["somchai@example.com", "jaidee@example.com"];
+    const cases = [
+        ["U1 email empty is blank", Utils_1.Utils.isBlank("") === true],
+        ["U2 email spaces only is blank", Utils_1.Utils.isBlank("   ") === true],
+        ["U3 email missing is blank", Utils_1.Utils.isBlank(undefined) === true],
+        ["U4 email with text is not blank", Utils_1.Utils.isBlank("a@b.co") === false],
+        ["U5 duplicate email found", Utils_1.Utils.isDuplicateEmail("jaidee@example.com", existing) === true],
+        ["U6 duplicate ignores case and spaces", Utils_1.Utils.isDuplicateEmail("  SomChai@Example.COM ", existing) === true],
+        ["U7 new email is not duplicate", Utils_1.Utils.isDuplicateEmail("new@example.com", existing) === false],
+        ["U8 empty list has no duplicate", Utils_1.Utils.isDuplicateEmail("a@b.co", []) === false]
+    ];
+    let bad = 0;
+    for (const [name, ok] of cases) {
+        if (ok) {
+            console.log(`Automation case ${name} passed`);
+        }
+        else {
+            console.log(`Automation case ${name} failed`);
+            bad++;
+        }
+    }
+    return bad;
+};
 const automation_test = () => __awaiter(void 0, void 0, void 0, function* () {
     const server = (0, child_process_1.spawn)(process.execPath, [path.join(__dirname, "index.js")], {
         env: Object.assign(Object.assign({}, process.env), { PORT: String(PORT) }),
         stdio: "ignore"
     });
-    let failed = 0;
+    let failed = util_checks();
     const expectRejected = (name, body) => __awaiter(void 0, void 0, void 0, function* () {
         const status = yield post(body);
         if (status === 400) {

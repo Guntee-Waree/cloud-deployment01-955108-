@@ -26,6 +26,16 @@ const unit_test = () => {
     check("6 capitalize", Utils_1.Utils.capitalize("sOMchai") === "Somchai");
     check("7 capitalize empty", Utils_1.Utils.capitalize("") === "");
     check("8 capitalize one char", Utils_1.Utils.capitalize("a") === "A");
+    // Utils.isBlank (email must not be empty)
+    check("20 isBlank empty", Utils_1.Utils.isBlank("") === true);
+    check("21 isBlank spaces", Utils_1.Utils.isBlank("   ") === true);
+    check("22 isBlank undefined", Utils_1.Utils.isBlank(undefined) === true);
+    check("23 isBlank text", Utils_1.Utils.isBlank(" a ") === false);
+    // Utils.isDuplicateEmail
+    check("24 isDuplicateEmail same", Utils_1.Utils.isDuplicateEmail("a@b.co", ["x@y.io", "a@b.co"]) === true);
+    check("25 isDuplicateEmail case + spaces", Utils_1.Utils.isDuplicateEmail(" A@B.CO ", ["a@b.co"]) === true);
+    check("26 isDuplicateEmail new email", Utils_1.Utils.isDuplicateEmail("new@b.co", ["a@b.co"]) === false);
+    check("27 isDuplicateEmail empty list", Utils_1.Utils.isDuplicateEmail("a@b.co", []) === false);
     // parseUserInput
     const ok = (0, UserValidation_1.parseUserInput)({ name: "  Somchai ", email: " Somchai@Example.com ", age: 20 });
     check("9 parseUserInput valid", ok !== null && ok.name === "Somchai"

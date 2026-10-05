@@ -18,9 +18,20 @@ function capitalize(text) {
     }
     return text[0].toUpperCase() + text.slice(1).toLowerCase();
 }
+// true when text is missing, empty or only spaces: "   " -> true
+function isBlank(text) {
+    return typeof text !== "string" || text.trim().length === 0;
+}
+// true when email is already in the list (ignores spaces and upper/lower case)
+function isDuplicateEmail(email, existingEmails) {
+    const wanted = email.trim().toLowerCase();
+    return existingEmails.some((e) => e.trim().toLowerCase() === wanted);
+}
 exports.Utils = {
     hello,
     add,
     trimText,
-    capitalize
+    capitalize,
+    isBlank,
+    isDuplicateEmail
 };
