@@ -1,8 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Greeting_1 = require("./Greeting");
-// Integration test: tests the Greeting module, which combines Utils.trimText + Utils.capitalize.
-// Exit code 0 = all cases passed, 1 = at least one case failed.
 const integration_test = () => {
     // case 1: spaces + lower case
     if (Greeting_1.Greeting.greet("  somchai ") === "Hello, Somchai!") {

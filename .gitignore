@@ -1,5 +1,13 @@
 *
+!.env.example
+.env
+!src/
+!src/*.ts
+!public/
+!public/*
 !dist/
 !dist/index.js
 # !dist/Utils.js
 !dist/Test1.js
+!postman/
+!postman/*.json

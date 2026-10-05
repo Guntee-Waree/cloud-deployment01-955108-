@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Manager</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --text:#1c2330; --muted:#667085; --line:#e4e7ec; --accent:#2f6fed; --danger:#d92d20; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --card:#1d2128; --text:#e7eaf0; --muted:#98a2b3; --line:#2b313b; --accent:#6e9bff; --danger:#f97066; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 16px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  form { display:grid; gap:10px; grid-template-columns:1fr 1fr 90px; }
+  form .actions { grid-column:1 / -1; display:flex; gap:8px; }
+  input { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; }
+  button { padding:8px 14px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--text); font:inherit; cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.danger { color:var(--danger); }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:500; font-size:13px; }
+  td.row-actions { text-align:right; white-space:nowrap; }
+  #msg { min-height:22px; margin:0 0 8px; color:var(--muted); }
+  #msg.error { color:var(--danger); }
+  .empty { color:var(--muted); padding:12px 0; }
+  @media (max-width:520px) { form { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>User Manager</h1>
+
+  <section>
+    <p id="msg" role="status"></p>
+    <form id="form">
+      <input id="name" placeholder="Name" aria-label="Name" required>
+      <input id="email" type="email" placeholder="Email" aria-label="Email" required>
+      <input id="age" type="number" min="0" step="1" placeholder="Age" aria-label="Age">
+      <div class="actions">
+        <button class="primary" type="submit" id="submit">Add user</button>
+        <button type="button" id="cancel" hidden>Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Age</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="empty" class="empty" hidden>No users yet.</div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const api = "/users";
+let editingId = null;
+
+function say(text, isError) {
+  $("msg").textContent = text || "";
+  $("msg").className = isError ? "error" : "";
+}
+
+async function request(url, options) {
+  const res = await fetch(url, options);
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Request failed (" + res.status + ")");
+  return data;
+}
+
+function cell(text) {
+  const td = document.createElement("td");
+  td.textContent = text;
+  return td;
+}
+
+function render(users) {
+  const rows = $("rows");
+  rows.replaceChildren();
+  $("empty").hidden = users.length > 0;
+  for (const u of users) {
+    const tr = document.createElement("tr");
+    tr.append(cell(u.name), cell(u.email), cell(u.age ?? ""));
+    const td = document.createElement("td");
+    td.className = "row-actions";
+    const edit = document.createElement("button");
+    edit.textContent = "Edit";
+    edit.onclick = () => startEdit(u);
+    const del = document.createElement("button");
+    del.textContent = "Delete";
+    del.className = "danger";
+    del.onclick = () => remove(u);
+    td.append(edit, " ", del);
+    tr.append(td);
+    rows.append(tr);
+  }
+}
+
+async function load() {
+  try {
+    render(await request(api));
+  } catch (e) {
+    say(e.message, true);
+  }
+}
+
+function resetForm() {
+  editingId = null;
+  $("form").reset();
+  $("submit").textContent = "Add user";
+  $("cancel").hidden = true;
+}
+
+function startEdit(u) {
+  editingId = u._id;
+  $("name").value = u.name;
+  $("email").value = u.email;
+  $("age").value = u.age ?? "";
+  $("submit").textContent = "Save changes";
+  $("cancel").hidden = false;
+  $("name").focus();
+}
+
+async function remove(u) {
+  if (!confirm("Delete " + u.name + "?")) return;
+  try {
+    await request(api + "/" + u._id, { method: "DELETE" });
+    say("User deleted.");
+    if (editingId === u._id) resetForm();
+    load();
+  } catch (e) {
+    say(e.message, true);
+  }
+}
+
+$("form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const body = { name: $("name").value, email: $("email").value };
+  if ($("age").value !== "") body.age = Number($("age").value);
+  const url = editingId ? api + "/" + editingId : api;
+  try {
+    await request(url, {
+      method: editingId ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    say(editingId ? "User updated." : "User added.");
+    resetForm();
+    load();
+  } catch (e) {
+    say(e.message, true);
+  }
+});
+
+$("cancel").addEventListener("click", () => { resetForm(); say(""); });
+
+load();
+</script>
+</body>
+</html>
