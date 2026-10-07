@@ -1,4 +1,6 @@
 *
+!package.json
+!Dockerfile
 !.env.example
 .env
 !src/
