@@ -2,8 +2,8 @@ name: Publish Docker image
 
 # Builds the Dockerfile and pushes the image to Docker Hub.
 # Needs two repository secrets (Settings > Secrets and variables > Actions):
-#   DOCKERHUB_USERNAME  - Docker Hub username
-#   DOCKERHUB_TOKEN     - Docker Hub access token (Account settings > Personal access tokens)
+#   DOCKER_USERNAME  - Docker Hub username
+#   DOCKER_PASSWORD  - Docker Hub access token (Account settings > Personal access tokens)
 on:
   workflow_dispatch:
     inputs:
@@ -25,14 +25,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/test1
+          images: ${{ secrets.DOCKER_USERNAME }}/test1
           tags: |
             type=raw,value=latest
             type=semver,pattern={{version}}
